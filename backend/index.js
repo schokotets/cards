@@ -63,6 +63,7 @@ function noteCorrect(id, correct) {
       q.wrong = q.wrong + 1
     }
   }
+  saveData()
 }
 
 function questionScore(q) {
