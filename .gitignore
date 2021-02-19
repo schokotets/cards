@@ -3,3 +3,4 @@ frontend/public/build/
 
 backend/loadtextquestions.sh
 backend/node_modules/
+backend/questions.json

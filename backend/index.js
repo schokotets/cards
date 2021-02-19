@@ -1,8 +1,9 @@
-const Koa = require("koa")
-const app = new Koa()
+const fs = require("fs")
 const util = require("util")
 const exec = util.promisify(require("child_process").exec)
 
+const Koa = require("koa")
+const app = new Koa()
 
 const bodyParser = require("koa-bodyparser")
 app.use(bodyParser({
@@ -24,6 +25,16 @@ function parseQuestions(text) {
 	})
 }
 
+function loadNewQuestions(newquestions) {
+  newquestions.forEach(nq => {
+    if (!questions.some(q => q.answer == nq.answer)){
+      nq.id = questions.reduce((max, q) => q.id > max ? q.id : max,-1)+1
+      questions.push(nq)
+    }
+  })
+  saveData()
+}
+
 function reloadQuestions() {
   return exec("./loadtextquestions.sh")
     .then(({stdout, stderr}) => {
@@ -33,7 +44,7 @@ function reloadQuestions() {
           error: stderr
         }
       } else {
-        questions = parseQuestions(stdout)
+        loadNewQuestions(parseQuestions(stdout))
         return {
           status: "ok"
         }
@@ -41,7 +52,7 @@ function reloadQuestions() {
     })
 }
 
-reloadQuestions()
+loadData()
 
 app.use(async ctx => {
     if (ctx.path == "/questions") {
@@ -73,3 +84,24 @@ app.use(async ctx => {
 
 app.listen(8099)
 console.log("cards backend listening on :8099")
+
+function saveData() {
+  fs.writeFile("questions.json", JSON.stringify(questions), function (err,data) {
+    if (err) {
+      return console.log(err);
+    }
+    if (data) {
+      console.log(data)
+    }
+  })
+  console.log("saved data")
+}
+
+function loadData() {
+  try {
+    questions = JSON.parse(fs.readFileSync("questions.json", 'utf8'))
+  } catch (err) {
+    console.error(err)
+    questions = []
+  }
+}
