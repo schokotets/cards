@@ -1,5 +1,6 @@
 {
   "name": "cards-frontend",
+  "description": "frontend for the cards webapp",
   "version": "1.0.0",
   "scripts": {
     "build": "rollup -c",
