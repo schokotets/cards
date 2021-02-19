@@ -42,6 +42,7 @@
 	<button on:click={loadNewQuestions}>Neue Fragen laden</button>
 	{#if question && Object.keys(question).length > 0}
 	<div class="card">
+		<p>{question.right} mal richtig, {question.wrong} mal falsch</p>
 		<h2>{question.question}</h2>
 		{#if answershown}
 		<p>{@html marked(question.answer)}</p>

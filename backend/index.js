@@ -27,7 +27,7 @@ function parseQuestions(text) {
 
 function loadNewQuestions(newquestions) {
   newquestions.forEach(nq => {
-    if (!questions.some(q => q.answer == nq.answer)){
+    if (!questions.some(q => q.question == nq.question)){
       nq.id = questions.reduce((max, q) => q.id > max ? q.id : max,-1)+1
       nq.right = 0
       nq.wrong = 0
@@ -65,6 +65,25 @@ function noteCorrect(id, correct) {
   }
 }
 
+function questionScore(q) {
+  if (q.right == 0) return 5
+  else return q.wrong/q.right + 0.1
+}
+
+function randomQuestion() {
+  let questionmap = questions
+    .map(q => { q.score = questionScore(q); return q })
+  sum = questionmap.reduce((sum, q) => sum+q.score, 0)
+  let scorelevel = Math.random()*sum
+  let currentlevel = 0
+  for (q of questionmap) {
+    currentlevel += q.score
+    if(currentlevel >= scorelevel)
+      return q
+  }
+  return questions[questions.length-1]
+}
+
 loadData()
 
 app.use(async ctx => {
@@ -78,7 +97,7 @@ app.use(async ctx => {
       ctx.body = await reloadQuestions()
     } else if (ctx.path == "/questions/random") {
       if (ctx.method == "GET") {
-        ctx.body = questions[0]
+        ctx.body = randomQuestion()
       } else {
         ctx.throw(405, "method not allowed")
       }
