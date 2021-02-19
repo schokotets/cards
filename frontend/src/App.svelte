@@ -79,9 +79,11 @@
 
 	main {
 		flex: 1;
+		margin: 1em;
 	}
 
-	main, footer {
+	footer {
 		margin: 1em;
+		margin-bottom: 20vh;
 	}
 </style>
