@@ -69,11 +69,11 @@
 <footer>
 	{#if !answershown}
 	<button on:click={showAnswer}>Antwort zeigen</button>
-	<button class="next" on:click={loadQuestion}>überspringen</button>
 	{:else}
 	<button on:click={sendResult.bind(this, false)}>✗ falsch</button>
 	<button on:click={sendResult.bind(this, true)}>✓ richtig</button>
 	{/if}
+	<button class="next" on:click={loadQuestion}>überspringen</button>
 </footer>
 </div>
 
