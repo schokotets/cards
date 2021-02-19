@@ -29,6 +29,8 @@ function loadNewQuestions(newquestions) {
   newquestions.forEach(nq => {
     if (!questions.some(q => q.answer == nq.answer)){
       nq.id = questions.reduce((max, q) => q.id > max ? q.id : max,-1)+1
+      nq.right = 0
+      nq.wrong = 0
       questions.push(nq)
     }
   })
@@ -52,6 +54,17 @@ function reloadQuestions() {
     })
 }
 
+function noteCorrect(id, correct) {
+  for (q of questions) {
+    if(q.id != id) continue
+    if(correct){
+      q.right = q.right + 1
+    } else {
+      q.wrong = q.wrong + 1
+    }
+  }
+}
+
 loadData()
 
 app.use(async ctx => {
@@ -73,6 +86,7 @@ app.use(async ctx => {
       if (ctx.method == "POST") {
         if ("id" in ctx.request.body && "correct" in ctx.request.body) {
           noteCorrect(ctx.request.body.id, ctx.request.body.correct)
+          ctx.body = { status: "ok" }
         }
       } else {
         ctx.throw(405, "method not allowed")

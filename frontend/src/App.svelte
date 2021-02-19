@@ -5,6 +5,7 @@
 	let answershown = false
 
 	function loadQuestion() {
+		answershown = false
 		fetch('/questions/random')
 			.then(response => response.json())
 			.then(data => { question = data } )
@@ -16,6 +17,20 @@
 
 	function loadNewQuestions() {
 		fetch('/questions/reload')
+	}
+
+	async function sendResult(correct) {
+		await fetch('/questions/result', {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				id: question.id,
+				correct
+			})
+		})
+		loadQuestion()
 	}
 
 	loadQuestion()
@@ -35,8 +50,13 @@
 	{/if}
 </main>
 <footer>
+	{#if !answershown}
 	<button on:click={showAnswer}>Antwort zeigen</button>
-	<button on:click={loadQuestion}>nächste Frage</button>
+	<button class="next" on:click={loadQuestion}>überspringen</button>
+	{:else}
+	<button on:click={sendResult.bind(this, false)}>✗ falsch</button>
+	<button on:click={sendResult.bind(this, true)}>✓ richtig</button>
+	{/if}
 </footer>
 </div>
 
@@ -50,6 +70,10 @@
 		height: 100%;
 		display: flex;
 		flex-direction: column;
+	}
+
+	.next {
+		float: right;
 	}
 
 	main {
