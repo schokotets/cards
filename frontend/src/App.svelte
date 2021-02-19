@@ -14,12 +14,17 @@
 		answershown = true
 	}
 
+	function loadNewQuestions() {
+		fetch('/questions/reload')
+	}
+
 	loadQuestion()
 </script>
 
 <div class="quiz">
 <main>
 	<h1>Karten lernen</h1>
+	<button on:click={loadNewQuestions}>Neue Fragen laden</button>
 	{#if question && Object.keys(question).length > 0}
 	<div class="card">
 		<h2>{question.question}</h2>
