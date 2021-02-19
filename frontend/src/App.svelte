@@ -15,7 +15,7 @@
 
 	function loadQuestion() {
 		answershown = false
-		return fetch('/questions/random?topic='+selectedtopic)
+		return fetch('/questions/random?topic='+selectedtopic+(question?'&currentid='+question.id:""))
 			.then(response => response.json())
 			.then(data => { question = data } )
 	}

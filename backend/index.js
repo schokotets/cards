@@ -83,9 +83,12 @@ function questionScore(q) {
   else return q.wrong/q.right + 0.1
 }
 
-function randomQuestion(topic) {
+function randomQuestion(topic,currentid) {
   let questionmap = questions
     .map(q => { q.score = questionScore(q); return q })
+  if (currentid && currentid != "undefined") {
+    questionmap = questionmap.filter(q => q.id != currentid)
+  }
   if (topic && topic != "undefined") {
     questionmap = questionmap.filter(q => q.topic == topic)
   }
@@ -129,7 +132,7 @@ app.use(async ctx => {
       ctx.body = await reloadQuestions()
     } else if (ctx.path == "/questions/random") {
       if (ctx.method == "GET") {
-        ctx.body = randomQuestion(ctx.request.query.topic)
+        ctx.body = randomQuestion(ctx.request.query.topic, ctx.request.query.currentid)
       } else {
         ctx.throw(405, "method not allowed")
       }
