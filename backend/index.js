@@ -16,13 +16,21 @@ app.use(serve("../frontend/public"))
 let questions = []
 
 function parseQuestions(text) {
-	let combined = text.split('\n\n').slice(1)
-	return combined.map(pair => {
-		let split = pair.split("\n")
-		let question = split[0].slice(5)
-		let answer = split.slice(1).join("\n")
-		return { question, answer }
-	})
+  let combined = text.split('\n\n').slice(1)
+  let topic = ""
+  let questions = []
+
+  for (potentialpair of combined) {
+		let split = potentialpair.split("\n")
+    if(split.length == 1) {
+      topic = split[0].slice(3)
+    } else {
+      let question = split[0].slice(5)
+      let answer = split.slice(1).join("\n")
+      questions.push({ question, answer, topic })
+    }
+  }
+	return questions
 }
 
 function loadNewQuestions(newquestions) {
@@ -32,6 +40,10 @@ function loadNewQuestions(newquestions) {
       nq.right = 0
       nq.wrong = 0
       questions.push(nq)
+    } else {
+      // update topic
+      q = questions.filter(q => q.question == nq.question)[0]
+      q.topic = nq.topic
     }
   })
   saveData()
@@ -71,9 +83,12 @@ function questionScore(q) {
   else return q.wrong/q.right + 0.1
 }
 
-function randomQuestion() {
+function randomQuestion(topic) {
   let questionmap = questions
     .map(q => { q.score = questionScore(q); return q })
+  if (topic && topic != "undefined") {
+    questionmap = questionmap.filter(q => q.topic == topic)
+  }
   sum = questionmap.reduce((sum, q) => sum+q.score, 0)
   let scorelevel = Math.random()*sum
   let currentlevel = 0
@@ -85,10 +100,26 @@ function randomQuestion() {
   return questions[questions.length-1]
 }
 
+function getTopics() {
+  let topics = []
+  for (q of questions) {
+    if (!topics.includes(q.topic)) {
+      topics.push(q.topic)
+    }
+  }
+  return topics
+}
+
 loadData()
 
 app.use(async ctx => {
-    if (ctx.path == "/questions") {
+    if (ctx.path == "/topics") {
+      if (ctx.method == "GET") {
+        ctx.body = getTopics()
+      } else {
+        ctx.throw(405, "method not allowed")
+      }
+    } else if (ctx.path == "/questions") {
       if (ctx.method == "GET") {
         ctx.body = questions
       } else {
@@ -98,7 +129,7 @@ app.use(async ctx => {
       ctx.body = await reloadQuestions()
     } else if (ctx.path == "/questions/random") {
       if (ctx.method == "GET") {
-        ctx.body = randomQuestion()
+        ctx.body = randomQuestion(ctx.request.query.topic)
       } else {
         ctx.throw(405, "method not allowed")
       }

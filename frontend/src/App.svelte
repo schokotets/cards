@@ -4,9 +4,18 @@
 	let question
 	let answershown = false
 
+	let topics
+	let selectedtopic
+
+	function loadTopics() {
+		return fetch('/topics')
+			.then(response => response.json())
+			.then(data => { topics = data } )
+	}
+
 	function loadQuestion() {
 		answershown = false
-		fetch('/questions/random')
+		return fetch('/questions/random?topic='+selectedtopic)
 			.then(response => response.json())
 			.then(data => { question = data } )
 	}
@@ -33,13 +42,20 @@
 		loadQuestion()
 	}
 
-	loadQuestion()
+	loadTopics().then(loadQuestion)
 </script>
 
 <div class="quiz">
 <main>
 	<h1>Karten lernen</h1>
 	<button on:click={loadNewQuestions}>Neue Fragen laden</button>
+	{#if topics && topics.length > 0}
+	<select bind:value={selectedtopic} on:change={loadQuestion}>
+		{#each topics as topic}
+		<option value="{topic}">{topic}</option>
+		{/each}
+	</select>
+	{/if}
 	{#if question && Object.keys(question).length > 0}
 	<div class="card">
 		<p>{question.right} mal richtig, {question.wrong} mal falsch</p>
